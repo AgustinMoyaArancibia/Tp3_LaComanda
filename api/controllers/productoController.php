@@ -1,7 +1,7 @@
 <?php
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\models\producto.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\interfaces\iApiUsable.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\models\pdf.php';
+require_once './models/producto.php';
+require_once './interfaces/iApiUsable.php';
+require_once './models/pdf.php';
 
 class ProductoController extends Producto implements IApiUsable
 {

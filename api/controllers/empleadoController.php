@@ -1,5 +1,5 @@
 <?php
-require_once './models/Pedido.php';
+require_once './models/pedido.php';
 
 class EmpleadoController extends Pedido
 {

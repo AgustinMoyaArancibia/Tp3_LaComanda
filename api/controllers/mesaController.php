@@ -1,6 +1,6 @@
 <?php
-require_once './models/Mesa.php';
-require_once './interfaces/IApiUsable.php';
+require_once './models/mesa.php';
+require_once './interfaces/iApiUsable.php';
 
 class MesaController extends Mesa implements IApiUsable
 {

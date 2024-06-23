@@ -1,5 +1,5 @@
 <?php
-require_once './models/Encuesta.php';
+require_once './models/encuesta.php';
 
 class EncuestaController extends Encuesta
 {

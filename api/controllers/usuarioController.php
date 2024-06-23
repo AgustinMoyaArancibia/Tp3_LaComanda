@@ -1,6 +1,6 @@
 <?php
-require_once './models/Usuario.php';
-require_once './interfaces/IApiUsable.php';
+require_once './models/usuario.php';
+require_once './interfaces/iApiUsable.php';
 
 class UsuarioController extends Usuario implements IApiUsable
 {

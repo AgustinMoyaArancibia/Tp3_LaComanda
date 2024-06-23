@@ -1,11 +1,12 @@
-<?php
+ <?php
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class AutentificadorJWT
 {
     private static $claveSecreta = 'T3sT$JWT';
-    private static $tipoEncriptacion = ['HS256'];
+    private static $tipoEncriptacion = 'HS256';
 
     public static function CrearToken($datos)
     {
@@ -17,48 +18,35 @@ class AutentificadorJWT
             'data' => $datos,
             'app' => "La Comanda"
         );
-        return JWT::encode($payload, self::$claveSecreta);
+        return JWT::encode($payload, self::$claveSecreta, self::$tipoEncriptacion);
     }
 
     public static function VerificarToken($token)
     {
         if (empty($token)) {
-            throw new Exception("El token esta vacio.");
+            throw new Exception("El token está vacío.");
         }
         try {
-            $decodificado = JWT::decode(
-                $token,
-                self::$claveSecreta,
-                self::$tipoEncriptacion
-            );
+            $decodificado = JWT::decode($token, new Key(self::$claveSecreta, self::$tipoEncriptacion));
         } catch (Exception $e) {
             throw $e;
         }
         if ($decodificado->aud !== self::Aud()) {
-            throw new Exception("No es el usuario valido");
+            throw new Exception("No es el usuario válido");
         }
     }
-
 
     public static function ObtenerPayLoad($token)
     {
         if (empty($token)) {
-            throw new Exception("El token esta vacio.");
+            throw new Exception("El token está vacío.");
         }
-        return JWT::decode(
-            $token,
-            self::$claveSecreta,
-            self::$tipoEncriptacion
-        );
+        return JWT::decode($token, new Key(self::$claveSecreta, self::$tipoEncriptacion));
     }
 
     public static function ObtenerData($token)
     {
-        return JWT::decode(
-            $token,
-            self::$claveSecreta,
-            self::$tipoEncriptacion
-        )->data;
+        return JWT::decode($token, new Key(self::$claveSecreta, self::$tipoEncriptacion))->data;
     }
 
     private static function Aud()
@@ -74,7 +62,7 @@ class AutentificadorJWT
         }
 
         $aud .= @$_SERVER['HTTP_USER_AGENT'];
-        $aud .= gethostname();
+        $aud += gethostname();
 
         return sha1($aud);
     }

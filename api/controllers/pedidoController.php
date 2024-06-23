@@ -1,7 +1,7 @@
 <?php
-require_once './models/Pedido.php';
-require_once './interfaces/IApiUsable.php';
-require_once './models/Producto.php';
+require_once './models/pedido.php';
+require_once './interfaces/iApiUsable.php';
+require_once './models/producto.php';
 
 class PedidoController extends Pedido implements IApiUsable
 {

@@ -7,15 +7,15 @@ use Slim\Routing\RouteCollectorProxy;
 use Slim\Routing\RouteContext;
 
 require __DIR__ . '/../vendor/autoload.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\controllers\usuarioController.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\controllers\mesaController.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\controllers\productoController.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\controllers\pedidoController.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\controllers\empleadoController.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\controllers\encuentraController.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\db\accesoDatos.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\middlewares\logger.php';
-require_once 'D:\xampp\htdocs\ejercicios_php\php-slim-base\api\middlewares\autentificadorJWT.php';
+require_once './controllers/usuarioController.php';
+require_once './controllers/mesaController.php';
+require_once './controllers/productoController.php';
+require_once './controllers/pedidoController.php';
+require_once './controllers/empleadoController.php';
+require_once './controllers/encuestaController.php';
+require_once './db/accesoDatos.php';
+require_once './middlewares/logger.php';
+require_once './middlewares/autentificadorJWT.php';
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
