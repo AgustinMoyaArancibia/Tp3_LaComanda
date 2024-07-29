@@ -56,10 +56,40 @@ class Producto
         $consulta->execute();
     }
 
-    public static function toString($producto){
+    public static function toString($producto)
+    {
 
 
-        return 'ID:'.$producto->id.' | PRODUCTO: '.$producto->producto.' | PRECIO: '.$producto->precio;
+        return 'ID:' . $producto->id . ' | PRODUCTO: ' . $producto->producto . ' | PRECIO: ' . $producto->precio;
+    }
+    
+    public static function obtenerProductosOrdenadosVentas()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("
+            SELECT p.producto AS producto, SUM(pe.cantidad) AS cantidadVendida
+        FROM productos p
+        JOIN pedidos pe ON p.id = pe.idProducto
+        GROUP BY p.id, p.producto
+        ORDER BY cantidadVendida DESC
+        ");
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
     }
 
+/*     public static function obtenerProductosOrdenadosVentas()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("
+            SELECT p.producto AS producto, COUNT(p.id) AS cantidadVendida
+            FROM productos p
+            JOIN pedidos pe ON p.id = pe.idProducto
+            GROUP BY p.id, p.producto
+            ORDER BY cantidadVendida DESC
+        ");
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+    } */
 }

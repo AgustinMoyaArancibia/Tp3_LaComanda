@@ -85,6 +85,29 @@ class Logger
         }
     }
 
+    public static function VerificadorAdminOMozo($request, $handler)
+    {
+        $token = self::validarToken($request);
+        if ($token === null) {
+            $response = new Response();
+            $response->getBody()->write(json_encode(array('error' => 'token vacio')));
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
+        try {
+            $payload = AutentificadorJWT::ObtenerData($token);
+            if ($payload->perfil === 'administrador' || $payload->perfil === 'mozo') {
+                return $handler->handle($request);
+            } else {
+                $response = new Response();
+                $response->getBody()->write(json_encode(array('error' => 'error de autenticacion')));
+                return $response->withHeader('Content-Type', 'application/json');
+            }
+        } catch (Exception $e) {
+            return self::manejarExcepcion(new Response(), $e);
+        }
+    }
+
     public static function PerfilEmpleado($request)
     {
         $token = self::validarToken($request);

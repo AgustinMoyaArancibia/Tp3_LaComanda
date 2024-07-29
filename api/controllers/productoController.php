@@ -1,7 +1,7 @@
 <?php
 require_once './models/producto.php';
 require_once './interfaces/iApiUsable.php';
-require_once './models/pdf.php';
+
 
 class ProductoController extends Producto implements IApiUsable
 {
@@ -123,7 +123,7 @@ class ProductoController extends Producto implements IApiUsable
     {
 
 
-      $archivo = fopen("./archivo/cargarproductos.csv", "r");
+      $archivo = fopen("./archivo/productos.csv", "r");
 
       if($archivo != false){
 
@@ -148,25 +148,38 @@ class ProductoController extends Producto implements IApiUsable
 
     public function GenerarPDF($request, $response, $args)
     {
+
         ob_clean();
         ob_start();
         $lista = Producto::obtenerTodos();
-        $pdf = new PDF();
+
+        $pdf = new FPDF();
         $pdf->SetTitle("Lista de Productos");
         $pdf->AddPage();
-        $pdf->Cell(150,10,'Lista Productos: ', 0, 1);
-        foreach($lista as $producto){
-          $pdf->Cell(150,10, Producto::toString($producto));
-          $pdf->Ln();
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(150, 10, 'Lista Productos: ', 0, 1);
+        foreach ($lista as $producto) {
+            $pdf->SetFont('Arial', '', 12);
+            $pdf->Cell(150,10, Producto::toString($producto));
+            $pdf->Ln();
         }
-        $pdf->Output('F', './archivo/PDFPRODUCTOS.pdf',false);
+        $pdf->Output('F', './archivo/PDFPRODUCTOS.pdf', false);
         ob_end_flush();
 
         $payload = json_encode(array("message" => "pdf generado"));
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function ObtenerProductosOrdenadosPorVentas($request, $response, $args)
+    {
+        $resultados = Producto::obtenerProductosOrdenadosVentas();
+        $payload = json_encode($resultados);
+    
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 
 }

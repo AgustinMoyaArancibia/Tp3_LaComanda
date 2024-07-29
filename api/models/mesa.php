@@ -11,8 +11,9 @@ class Mesa
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO mesas (idMesa, estado) VALUES (:idMesa, :estado)");
+        $estado = 'abierta';
         $consulta->bindValue(':idMesa', $this->idMesa, PDO::PARAM_STR);
-        $consulta->bindValue(':estado', $this->estado, PDO::PARAM_STR);
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
         $consulta->execute();
 
         return $objAccesoDatos->obtenerUltimoId();
@@ -29,8 +30,8 @@ class Mesa
         return $consulta->fetchAll(PDO::FETCH_CLASS, 'Mesa');
     }
 
-    
-//obtengo mesa en particular
+
+    //obtengo mesa en particular
     public static function obtenerMesa($idMesa)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
@@ -59,12 +60,12 @@ class Mesa
     public function modificarMesaCerrada()
     {
         $objAccesoDato = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estado = :estado, idMesa = :idMesa WHERE id = :id");
-
+        $consulta = $objAccesoDato->prepararConsulta("UPDATE mesas SET estado = :estado WHERE idMesa = :idMesa");
+    
         $estado = 'cerrada';
         $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
-        $consulta->bindValue(':idMesa', $this->idMesa, PDO::PARAM_STR);
-        $consulta->bindValue(':id', $this->id, PDO::PARAM_STR);
+        $consulta->bindValue(':idMesa', $this->idMesa, PDO::PARAM_INT);
+        
         $consulta->execute();
         return $consulta->rowCount();
     }
@@ -80,9 +81,38 @@ class Mesa
     }
 
     //imprimo la mesa
-    public static function toString($mesa){
+    public static function toString($mesa)
+    {
 
-        return 'ID:'.$mesa->id.' | MESA: '.$mesa->idMesa.' | ESTADO: '.$mesa->estado;
+        return 'ID:' . $mesa->id . ' | MESA: ' . $mesa->idMesa . ' | ESTADO: ' . $mesa->estado;
     }
 
+    public static function obtenerMesasOrdenadasFactura()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("
+            SELECT idMesa, SUM(monto) AS totalFactura
+            FROM pedidos
+            GROUP BY idMesa
+            ORDER BY totalFactura ASC
+        ");
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function obtenerFacturacionMesaEntreDosFechas($idMesa, $fechaInicio, $fechaFin)
+{
+    $objAccesoDatos = AccesoDatos::obtenerInstancia();
+    $consulta = $objAccesoDatos->prepararConsulta("
+        SELECT idMesa, SUM(monto) AS totalFacturado
+        FROM pedidos
+        WHERE idMesa = :idMesa AND horaEntrega BETWEEN :fechaInicio AND :fechaFin
+        GROUP BY idMesa
+    ");
+    $consulta->bindValue(':idMesa', $idMesa, PDO::PARAM_INT);
+    $consulta->bindValue(':fechaInicio', $fechaInicio, PDO::PARAM_STR);
+    $consulta->bindValue(':fechaFin', $fechaFin, PDO::PARAM_STR);
+    $consulta->execute();
+    return $consulta->fetch(PDO::FETCH_OBJ);
+}
 }

@@ -146,7 +146,8 @@ class Pedido
         $consulta->execute();
     }
 
-    public static function listarPendientes($perfil){
+    public static function listarPendientes($perfil)
+    {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("SELECT pedidos.id, pedidos.idMesa, pedidos.idProducto, productos.producto, pedidos.cantidad, pedidos.cliente, pedidos.perfil, pedidos.estado FROM pedidos, productos WHERE perfil = :perfil AND estado = :estado AND pedidos.idProducto = productos.id");
         $estado = 'pendiente';
@@ -157,10 +158,35 @@ class Pedido
         return $consulta->fetchAll(PDO::FETCH_OBJ);
     }
 
-    public static function toString($pedido){
+    public static function listarEnPreparacion($perfil)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT pedidos.id, pedidos.idMesa, pedidos.idProducto, productos.producto, pedidos.cantidad, pedidos.cliente, pedidos.perfil, pedidos.estado FROM pedidos, productos WHERE perfil = :perfil AND estado = :estado AND pedidos.idProducto = productos.id");
+        $estado = 'en preparacion';
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
+        $consulta->bindValue(':perfil', $perfil, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function listarListos($perfil)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT pedidos.id, pedidos.idMesa, pedidos.idProducto, productos.producto, pedidos.cantidad, pedidos.cliente, pedidos.perfil, pedidos.estado FROM pedidos, productos WHERE perfil = :perfil AND estado = :estado AND pedidos.idProducto = productos.id");
+        $estado = 'listo para servir';
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
+        $consulta->bindValue(':perfil', $perfil, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function toString($pedido)
+    {
 
 
-        return 'ID:'.$pedido->id.' | MESA: '.$pedido->idMesa.' | CLIENTE: '.$pedido->cliente.' | ESTADO: '.$pedido->estado.' | MONTO: '.$pedido->monto;
+        return 'ID:' . $pedido->id . ' | MESA: ' . $pedido->idMesa . ' | CLIENTE: ' . $pedido->cliente . ' | ESTADO: ' . $pedido->estado . ' | MONTO: ' . $pedido->monto;
     }
 
     public static function obtenerTiempoEstimado($id)
@@ -181,5 +207,66 @@ class Pedido
 
         return $consulta->fetchObject();
     }
+
+
+    public static function listarPerfil($perfil)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT pedidos.id, pedidos.idMesa, pedidos.idProducto, productos.producto, pedidos.cantidad, pedidos.cliente, pedidos.perfil, pedidos.estado FROM pedidos, productos WHERE perfil = :perfil AND estado = :estado AND pedidos.idProducto = productos.id");
+        $estado = 'pendiente';
+        $consulta->bindValue(':estado', $estado, PDO::PARAM_STR);
+        $consulta->bindValue(':perfil', $perfil, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public static function obtenerPedidosNoEntregadosATiempo()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta(
+            "SELECT * FROM pedidos 
+             WHERE estado = 'cobrado' 
+               AND tiempoEstimado < NOW() 
+               AND (horaEntrega IS NULL OR horaEntrega > tiempoEstimado)"
+        );
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+    }
+
+
+    public static function cantidadOperacionesPorSector()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("
+        SELECT perfil, COUNT(*) AS cantidadOperaciones 
+        FROM pedidos 
+        GROUP BY perfil
+    ");
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
+    }
+
+
+    public static function obtenerPedidosPorMesaYCliente($idMesa, $cliente)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE idMesa = :idMesa AND cliente = :cliente");
+        $consulta->bindValue(':idMesa', $idMesa, PDO::PARAM_INT);
+        $consulta->bindValue(':cliente', $cliente, PDO::PARAM_STR);
+        $consulta->execute();
+
+        return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+    }
+
+    public static function where($column, $value)
+{
+    $objAccesoDatos = AccesoDatos::obtenerInstancia();
+    $consulta = $objAccesoDatos->prepararConsulta("SELECT * FROM pedidos WHERE $column = :value");
+    $consulta->bindValue(':value', $value, PDO::PARAM_INT);
+    $consulta->execute();
+
+    return $consulta->fetchAll(PDO::FETCH_CLASS, 'Pedido');
+}
 
 }

@@ -1,4 +1,4 @@
- <?php
+<?php
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -62,7 +62,7 @@ class AutentificadorJWT
         }
 
         $aud .= @$_SERVER['HTTP_USER_AGENT'];
-        $aud += gethostname();
+        $aud .= gethostname();  // Cambio realizado aquí
 
         return sha1($aud);
     }

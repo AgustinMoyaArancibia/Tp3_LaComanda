@@ -6,9 +6,9 @@ class EmpleadoController extends Pedido
   public static function ListarPedidos($request, $response, $args){
 
         $perfil = $args['perfil'];
-        $empleado = Logger::PerfilEmpleado($request);
+        /* $empleado = Logger::PerfilEmpleado($request); */
 
-        if($empleado == $perfil){
+        if( $perfil){
 
           $lista = Pedido::listarPendientes($perfil);
           $payload = json_encode(array("listaPendientes" => $lista));
@@ -30,11 +30,11 @@ class EmpleadoController extends Pedido
     $perfil = $parametros['perfil'];
     $tiempoEstimado = $parametros['tiempoEstimado'];
 
-    $empleado = Logger::PerfilEmpleado($request);
+    /* $empleado = Logger::PerfilEmpleado($request); */
     //var_dump($empleado);
    //var_dump($perfil);
 
-    if($empleado == $perfil){
+    if($perfil){
 
       $row = Pedido::modificarEnPreparacion($id, $tiempoEstimado);
       if($row>0){
@@ -95,9 +95,9 @@ public static function PedidoListo($request, $response, $args){
   $id = $parametros['id'];
   $perfil = $parametros['perfil'];
 
-  $empleado = Logger::PerfilEmpleado($request);
+  /* $empleado = Logger::PerfilEmpleado($request); */
 
-  if($empleado == $perfil){
+  if( $perfil){
 
     $row = Pedido::modificarPedidoListo($id);
     if($row>0){

@@ -11,6 +11,7 @@ class Usuario
 
     public function crearUsuario()
     {
+
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO usuarios (usuario, clave, perfil, estado) VALUES (:usuario, :clave, :perfil, :estado)");
         $estado = 'disponible';
@@ -36,7 +37,7 @@ class Usuario
     public static function obtenerUsuario($id)
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, clave, perfil, estado FROM usuarios WHERE id = :id");
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT id, usuario, perfil, estado FROM usuarios WHERE id = :id");
         $consulta->bindValue(':id', $id, PDO::PARAM_INT);
         $consulta->execute();
 
@@ -82,14 +83,15 @@ class Usuario
         $consulta->execute();
     }
 
-    public function Equals($user){
+    public function Equals($user)
+    {
 
         $retorno = -1;
 
-        if($this->usuario == $user->usuario){
+        if ($this->usuario == $user->usuario) {
             $retorno = 0;
-            
-            if(password_verify($this->clave, $user->clave)){
+
+            if (password_verify($this->clave, $user->clave)) {
                 $retorno = 1;
             }
         }
@@ -101,8 +103,10 @@ class Usuario
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
         $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO registro (idUsuario, usuario, fecha) VALUES (:idUsuario, :usuario, :fecha)");
+
         
         $fecha = new DateTime();
+      
         $fechaLogin = $fecha->format('Y-m-d H:i:s');
         $consulta->bindValue(':usuario', $this->usuario, PDO::PARAM_STR);
         $consulta->bindValue(':idUsuario', $this->id, PDO::PARAM_INT);
@@ -112,9 +116,23 @@ class Usuario
         return $objAccesoDatos->obtenerUltimoId();
     }
 
-    public static function toString($usuario){
+    public static function toString($usuario)
+    {
 
 
-        return 'ID:'.$usuario->id.' | USUARIO: '.$usuario->usuario.' | PERFIL: '.$usuario->perfil;
+        return 'ID:' . $usuario->id . ' | USUARIO: ' . $usuario->usuario . ' | PERFIL: ' . $usuario->perfil;
+    }
+
+    public static function obtenerDiasYHorariosEmpleado($empleadoId)
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("
+        SELECT DATE(fecha) AS dia, TIME(fecha) AS horario
+        FROM registro
+        WHERE idUsuario = :empleadoId
+    ");
+        $consulta->bindValue(':empleadoId', $empleadoId, PDO::PARAM_INT);
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_OBJ);
     }
 }

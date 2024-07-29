@@ -2,7 +2,9 @@
 require_once './models/usuario.php';
 require_once './interfaces/iApiUsable.php';
 
-class UsuarioController extends Usuario implements IApiUsable
+
+
+class UsuarioController extends Usuario
 {
     public function CargarUno($request, $response, $args)
     {
@@ -17,14 +19,27 @@ class UsuarioController extends Usuario implements IApiUsable
         $usr->usuario = $usuario;
         $usr->clave = $clave;
         $usr->perfil = $perfil;
+
         $usr->crearUsuario();
 
         $payload = json_encode(array("mensaje" => "Usuario creado con exito"));
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
     }
+
+
+    public function TraerTodos($request, $response, $args)
+    {
+        $lista = Usuario::obtenerTodos();
+        $payload = json_encode(array("listaUsuario" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
+    }
+
 
     public function TraerUno($request, $response, $args)
     {
@@ -35,19 +50,9 @@ class UsuarioController extends Usuario implements IApiUsable
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
     }
 
-    public function TraerTodos($request, $response, $args)
-    {
-        $lista = Usuario::obtenerTodos();
-        $payload = json_encode(array("listaUsuario" => $lista));
-
-        $response->getBody()->write($payload);
-        return $response
-          ->withHeader('Content-Type', 'application/json');
-    }
-    
     public function ModificarUno($request, $response, $args)
     {
         $parametros = $request->getParsedBody();
@@ -66,15 +71,15 @@ class UsuarioController extends Usuario implements IApiUsable
         $usr->id = $args['id'];
         $columnas = $usr->modificarUsuario();
 
-        if($columnas != false){
-          $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
-        }else{
-          $payload = json_encode(array("mensaje" => "No se pudo modificar"));
+        if ($columnas != false) {
+            $payload = json_encode(array("mensaje" => "Usuario modificado con exito"));
+        } else {
+            $payload = json_encode(array("mensaje" => "No se pudo modificar"));
         }
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
     }
 
     public function BorrarUno($request, $response, $args)
@@ -84,77 +89,90 @@ class UsuarioController extends Usuario implements IApiUsable
 
         $usuario = Usuario::obtenerUsuario($usuarioId);
 
-        if($usuario != false){
-          Usuario::borrarUsuario($usuarioId);
-          $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
-        } else{
-          $payload = json_encode(array("mensaje" => "No se encontro usuario"));
+        if ($usuario != false) {
+            Usuario::borrarUsuario($usuarioId);
+            $payload = json_encode(array("mensaje" => "Usuario borrado con exito"));
+        } else {
+            $payload = json_encode(array("mensaje" => "No se encontro usuario"));
         }
 
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
     }
 
-    public function ValidarUsuario($request, $response, $args){
+    public function ValidarUsuario($request, $response, $args)
+    {
 
-      $parametros = $request->getParsedBody();
-
-      var_dump("usuario pasado" ,$parametros);
-      $usuario = $parametros['usuario'];
-      $clave = $parametros['clave'];
-      $payload = json_encode(array("mensaje" => "Error de autenticacion"));
-
-      $auxUser = Usuario::loginUsuario($usuario);
-      var_dump("usuario base de datos" ,$auxUser);
-      if($auxUser != false && $auxUser->estado == 'disponible'){
-
-        $validar = password_verify($clave, $auxUser->clave);
-        
-        var_dump($clave == $auxUser->clave);
-        if($clave == $auxUser->clave){
-
-          $datos = array('usuario' => $usuario, 'clave' => $auxUser->clave, 'perfil' => $auxUser->perfil);
-          $token = AutentificadorJWT::CrearToken($datos);
-          $payload = json_encode(array("jwt" => $token, "response" => "ok", "perfil de usuario" => $auxUser->perfil));
-
-          //registro fecha y hora de login al sistema
-          $auxUser->registroLogin();
-
-        }
-
-      };
+        $parametros = $request->getParsedBody();
 
 
-      $response->getBody()->write($payload);
-      return $response
-        ->withHeader('Content-Type', 'application/json');
+        $usuario = $parametros['usuario'];
+        $clave = $parametros['clave'];
+        $payload = json_encode(array("mensaje" => "Error de autenticacion"));
+
+        $auxUser = Usuario::loginUsuario($usuario);
+
+        if ($auxUser != false && $auxUser->estado == 'disponible') {
+
+            $clave = password_verify($clave, $auxUser->clave);
 
 
+            if ($clave == $auxUser->clave) {
+
+                $datos = array('usuario' => $usuario, 'clave' => $auxUser->clave, 'perfil' => $auxUser->perfil);
+                $token = AutentificadorJWT::CrearToken($datos);
+                $payload = json_encode(array("jwt" => $token, "response" => "ok", "perfil de usuario" => $auxUser->perfil));
+
+                //registro fecha y hora de login al sistema
+                $auxUser->registroLogin();
+            }
+        };
+
+
+        $response->getBody()->write($payload);
+        return $response
+            ->withHeader('Content-Type', 'application/json');
     }
 
     public function GenerarPDF($request, $response, $args)
     {
+
         ob_clean();
         ob_start();
         $lista = Usuario::obtenerTodos();
-        $pdf = new PDF();
+
+        $pdf = new FPDF();
         $pdf->SetTitle("Lista de Usuarios");
         $pdf->AddPage();
-        $pdf->Cell(150,10,'Lista Usuarios: ', 0, 1);
-        foreach($lista as $usuario){
-          $pdf->Cell(150,10, Usuario::toString($usuario));
-          $pdf->Ln();
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(150, 10, 'Lista Usuarios: ', 0, 1);
+        foreach ($lista as $usuario) {
+            $pdf->SetFont('Arial', '', 12);
+            $pdf->Cell(150, 10, Usuario::toString($usuario));
+            $pdf->Ln();
         }
-        $pdf->Output('F', './archivo/PDFUSUARIOS.pdf',false);
+        $pdf->Output('F', './archivo/PDFUSUARIOS.pdf', false);
         ob_end_flush();
 
         $payload = json_encode(array("message" => "pdf generado"));
 
         $response->getBody()->write($payload);
         return $response
-          ->withHeader('Content-Type', 'application/json');
+            ->withHeader('Content-Type', 'application/json');
     }
 
+    public function ObtenerDiasYHorariosPorEmpleado($request, $response, $args)
+    {
+        $datos = $request->getParsedBody();
+        $idUsuario = $datos['idUsuario'];
+
+        $registros = Usuario::obtenerDiasYHorariosEmpleado($idUsuario);
+
+        $payload = json_encode($registros);
+
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }
